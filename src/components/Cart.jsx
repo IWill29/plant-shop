@@ -1,101 +1,152 @@
-// Importē Redux hookus
-   import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import styles from './Cart.module.css';
 
-   // Iepirkumu groza komponente
-   const Cart = () => {
-     const dispatch = useDispatch(); // Ļauj nosūtīt darbības uz Redux
-     const cart = useSelector(state => state.cart); // Iegūst groza saturu no Redux
-     // Aprēķina kopējo preču skaitu
-     const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-     // Aprēķina kopējo summu
-     const totalCost = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+const Cart = () => {
+  const dispatch = useDispatch();
+  const cart = useSelector(state => state.cart || []);
 
-     // Palielina preces daudzumu
-     const handleIncrement = id => {
-       dispatch({
-         type: 'UPDATE_QUANTITY',
-         payload: { id, quantity: cart.find(item => item.id === id).quantity + 1 },
-       });
-     };
+  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const totalCost = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-     // Samazina preces daudzumu
-     const handleDecrement = id => {
-       dispatch({
-         type: 'UPDATE_QUANTITY',
-         payload: { id, quantity: cart.find(item => item.id === id).quantity - 1 },
-       });
-     };
+  const handleIncrement = id => {
+    dispatch({
+      type: 'UPDATE_QUANTITY',
+      payload: { id, quantity: cart.find(item => item.id === id).quantity + 1 },
+    });
+  };
 
-     // Dzēš preci no groza
-     const handleRemove = id => {
-       dispatch({ type: 'REMOVE_ITEM', payload: id });
-     };
+  const handleDecrement = id => {
+    const current = cart.find(item => item.id === id);
+    if (!current) return;
+    const nextQty = current.quantity - 1;
+    if (nextQty <= 0) {
+      dispatch({ type: 'REMOVE_ITEM', payload: id });
+    } else {
+      dispatch({ type: 'UPDATE_QUANTITY', payload: { id, quantity: nextQty } });
+    }
+  };
 
-     return (
-       <div className="p-4 max-w-6xl mx-auto">
-         {/* Lapas virsraksts */}
-         <h2 className="text-2xl font-bold mb-4 text-center">Iepirkumu grozs</h2>
-         {/* Kopējais preču skaits */}
-         <p className="text-lg mb-2">Kopējais preču skaits: {cartCount}</p>
-         {/* Kopējā summa */}
-         <p className="text-lg mb-4">Kopējā summa: ${totalCost.toFixed(2)}</p>
-         {/* Pārbauda, vai grozs ir tukšs */}
-         {cart.length === 0 ? (
-           <p className="text-center text-gray-600">Jūsu grozs ir tukšs.</p>
-         ) : (
-           <div className="space-y-4">
-             {/* Iterē pa groza precēm */}
-             {cart.map(item => (
-               <div key={item.id} className="flex items-center border p-4 rounded-lg shadow-sm">
-                 {/* Preces attēls */}
-                 <img src={item.thumbnail} alt={item.name} className="w-16 h-16 object-cover mr-4 rounded" />
-                 <div className="flex-1">
-                   {/* Preces nosaukums */}
-                   <h4 className="text-lg font-semibold">{item.name}</h4>
-                   {/* Vienības cena */}
-                   <p className="text-gray-600">Vienības cena: ${item.price.toFixed(2)}</p>
-                   {/* Daudzums */}
-                   <p className="text-gray-600">Daudzums: {item.quantity}</p>
-                 </div>
-                 {/* Pogas preces pārvaldībai */}
-                 <div className="flex space-x-2">
-                   <button
-                     onClick={() => handleIncrement(item.id)}
-                     className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
-                   >
-                     +
-                   </button>
-                   <button
-                     onClick={() => handleDecrement(item.id)}
-                     className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
-                   >
-                     -
-                   </button>
-                   <button
-                     onClick={() => handleRemove(item.id)}
-                     className="bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700"
-                   >
-                     Dzēst
-                   </button>
-                 </div>
-               </div>
-             ))}
-           </div>
-         )}
-         {/* Navigācijas pogas */}
-         <div className="mt-6 flex justify-between">
-           <a href="#products" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-             Turpināt iepirkties
-           </a>
-           <button
-             onClick={() => alert('Drīzumā būs pieejams!')}
-             className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-           >
-             Apmaksāt
-           </button>
-         </div>
-       </div>
-     );
-   };
+  const handleRemove = id => {
+    dispatch({ type: 'REMOVE_ITEM', payload: id });
+  };
 
-   export default Cart;
+  // Allow typed quantity change (sanitised)
+  const handleQtyChange = (id, value) => {
+    const qty = Math.max(1, Number(value) || 1);
+    dispatch({ type: 'UPDATE_QUANTITY', payload: { id, quantity: qty } });
+  };
+
+  return (
+    <main className={styles.container}>
+      {/* Simplified hero header with plain text stats */}
+      <div className={styles.heroHeader} role="region" aria-label="Grozs informācija">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div className={styles.heroAccent} aria-hidden="true" />
+          <div>
+            <h2 className={styles.heroTitle}>Iepirkumu grozs</h2>
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.content}>
+        <section className={styles.cartList} aria-live="polite" aria-label="Grozs — preces">
+          {cart.length === 0 ? (
+            <div className={styles.empty}>
+              <p style={{ margin: 0, fontWeight: 700 }}>Grozs ir tukšs</p>
+              <p style={{ marginTop: 8, color: '#6b7280' }}>Pievieno augus no sadaļas Produkti</p>
+            </div>
+          ) : (
+            cart.map(item => (
+              <article key={item.id} className={styles.cartItem} aria-label={item.name}>
+                <img src={item.thumbnail} alt={item.name} className={styles.itemImage} />
+
+                <div className={styles.cartInfo}>
+                  <h4 className={styles.itemName}>{item.name}</h4>
+
+                  <div className={styles.itemMeta}>
+                    <span className={styles.muted}>Vienības cena: ${item.price.toFixed(2)}</span>
+                    <span className={styles.itemSubtotal}>Subtotal: ${(item.price * item.quantity).toFixed(2)}</span>
+                  </div>
+                </div>
+
+                <div className={styles.controls} role="group" aria-label={`Kontroles priekš ${item.name}`}>
+                  <div className={styles.stepper} aria-hidden="false">
+                    <button
+                      className={styles.stepBtn}
+                      onClick={() => handleDecrement(item.id)}
+                      aria-label={`Samazināt daudzumu ${item.name}`}
+                    >
+                      −
+                    </button>
+                    <input
+                      className={styles.stepInput}
+                      type="number"
+                      inputMode="numeric"
+                      min="1"
+                      value={item.quantity}
+                      onChange={e => handleQtyChange(item.id, e.target.value)}
+                      aria-label={`Daudzums ${item.name}`}
+                    />
+                    <button
+                      className={styles.stepBtn}
+                      onClick={() => handleIncrement(item.id)}
+                      aria-label={`Palielināt daudzumu ${item.name}`}
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  <button
+                    className={styles.removeBtn}
+                    onClick={() => handleRemove(item.id)}
+                    aria-label={`Noņemt ${item.name} no groza`}
+                    title="Noņemt"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M3 6h18" stroke="#ef4444" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M8 6v12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6" stroke="#ef4444" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M10 11v6" stroke="#ef4444" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M14 11v6" stroke="#ef4444" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M9 6l1-2h4l1 2" stroke="#ef4444" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                </div>
+              </article>
+            ))
+          )}
+        </section>
+
+        <aside className={styles.summaryBox} aria-label="Grozs — kopsavilkums">
+          <div>
+            <div className={styles.summaryRow}>
+              <span className={styles.totalLabel}>Preču skaits</span>
+              <span className={styles.totalValue}>{cartCount}</span>
+            </div>
+
+            <div className={styles.summaryRow}>
+              <span className={styles.totalLabel}>Kopā</span>
+              <span className={styles.totalValue}>${totalCost.toFixed(2)}</span>
+            </div>
+          </div>
+
+          <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
+            <a href="#products" className={`${styles.btn} ${styles.btnGhost}`} aria-label="Turpināt iepirkties">Turpināt iepirkties</a>
+            <button
+              className={`${styles.btn} ${styles.btnPrimary}`}
+              onClick={() => alert('Drīzumā būs pieejams!')}
+              aria-label="Apmaksāt"
+            >
+              Apmaksāt — ${totalCost.toFixed(2)}
+            </button>
+          </div>
+
+          <div style={{ marginTop: 12, fontSize: 12, color: '#6b7280' }}>
+            Bezmaksas atgriešana 14 dienu laikā • Droša apmaksa
+          </div>
+        </aside>
+      </div>
+    </main>
+  );
+};
+
+export default Cart;

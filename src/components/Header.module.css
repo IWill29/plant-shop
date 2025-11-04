@@ -1,0 +1,131 @@
+/* Visu stilu mērķis: tīrs, moderns un responsīvs header ar pieejamības uzlabojumiem */
+
+/* Krāsu palete un ātrie util mainīgie (lokāli failā, var pārvietot uz :root) */
+:root {
+  --primary-500: #16a34a;
+  --primary-700: #059669;
+  --white: #ffffff;
+  --text-dark: #06393a;
+  --muted: rgba(2,6,23,0.45);
+  --glass: rgba(255,255,255,0.06);
+  --shadow-sm: 0 6px 16px rgba(2,6,23,0.06);
+  --shadow-md: 0 12px 30px rgba(2,6,23,0.10);
+  --radius-full: 999px;
+}
+
+/* Header container */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  background: linear-gradient(90deg, rgba(22,163,74,0.95), rgba(5,150,105,0.92));
+  color: var(--white);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Inner wrapper to align content with global .container if used */
+.headerInner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* Logo group */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.circle {
+  width: 44px;
+  height: 44px;
+  background: var(--white);
+  border-radius: var(--radius-full);
+  display: inline-grid;
+  place-items: center;
+  box-shadow: var(--shadow-sm);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.circle:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 16px 40px rgba(2,6,23,0.12);
+}
+.logoTitle {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  color: var(--white);
+  text-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+
+/* Nav */
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Button base */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: var(--radius-full);
+  background: var(--white);
+  color: var(--text-dark);
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+  transition: transform .15s ease, box-shadow .15s ease, background .12s;
+}
+.btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(16,185,129,0.14);
+}
+
+/* Smaller variant for compact cart button */
+.btnSmall {
+  padding: 8px 10px;
+}
+
+/* Cart badge wrapper */
+.badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Badge number */
+.badgeCount {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ef4444;
+  color: var(--white);
+  border-radius: var(--radius-full);
+  padding: 3px 7px;
+  font-size: 12px;
+  line-height: 1;
+  box-shadow: 0 6px 16px rgba(2,6,23,0.12);
+}
+
+/* Hover/focus visual states */
+.btn:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(2,6,23,0.10); }
+.btn:active { transform: translateY(-1px); }
+
+/* Responsive tweaks */
+@media (max-width: 540px) {
+  .headerInner { padding: 10px; }
+  .logoTitle { font-size: 1rem; }
+  .circle { width: 38px; height: 38px; }
+  .btn { padding: 6px 10px; font-size: 0.95rem; }
+}
